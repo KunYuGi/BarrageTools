@@ -187,7 +187,6 @@ public class DyBulletScreenClient{
 			System.arraycopy(recvByte, 0, realBuf, 0, recvLen);
 			//根据TCP协议获取返回信息中的字符串信息
 			dataStr = new String(realBuf, 12, realBuf.length - 12);
-			
 			//循环处理socekt黏包情况
 			while(dataStr.lastIndexOf("type@=") > 5){
 				//对黏包中最后一个数据包进行解析
@@ -223,7 +222,7 @@ public class DyBulletScreenClient{
 			}
     		
     		/***@TODO 根据业务需求来处理获取到的所有弹幕及礼物信息***********/
-    		
+    		System.out.println(msg.get("type"));
 			//判断消息类型
 			if(msg.get("type").equals("chatmsg")){//弹幕消息
 //				logger.debug("弹幕消息===>" + msg.toString());

@@ -1,2 +1,11 @@
 eclipse.preferences.version=1
 encoding//resource/log4j.properties=UTF-8
+encoding//src/com/barrage/app=UTF-8
+encoding//src/com/barrage/client/DyBulletScreenClient.java=UTF-8
+encoding//src/com/barrage/controller/TestController.java=UTF-8
+encoding//src/com/barrage/msg=UTF-8
+encoding//src/com/barrage/utils=UTF-8
+encoding//src/com/barrage/websocket=UTF-8
+encoding//src/com/barrage/websocket/WebSocketTest.java=UTF-8
+encoding/<project>=UTF-8
+encoding/resource=UTF-8

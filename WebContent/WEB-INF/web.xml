@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd
+	http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd" 
+	id="WebApp_ID" version="3.0">
    <!-- 指定mybatis的配置文件  -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -26,7 +31,7 @@
 	<servlet-mapping>
 		<servlet-name>SpringMVC</servlet-name>
 		<!-- 此处可以可以配置成*.do，对应struts的后缀习惯 -->
-		<url-pattern>*.do</url-pattern>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	
 		<!-- LOG4J的配置文件 -->
@@ -62,4 +67,12 @@
 	<listener>
 		<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
 	</listener>
+	
+	<servlet-mapping>    
+    	<servlet-name>default</servlet-name>    
+    	<url-pattern>*.js</url-pattern>    
+    	<url-pattern>*.css</url-pattern>    
+    	<url-pattern>/assets/*"</url-pattern>    
+    	<url-pattern>/images/*</url-pattern>    
+	</servlet-mapping>
 </web-app>
