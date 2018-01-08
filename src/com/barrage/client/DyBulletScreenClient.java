@@ -4,6 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -38,7 +40,11 @@ public class DyBulletScreenClient{
     //获取弹幕线程及心跳线程运行和停止标记
     private boolean readyFlag = false;
     
-    private DyBulletScreenClient(){}
+    public void setReadyFlag(boolean readyFlag) {
+		this.readyFlag = readyFlag;
+	}
+
+	private DyBulletScreenClient(){}
     
     /**
      * 单例获取方法，客户端单例模式访问
@@ -239,5 +245,46 @@ public class DyBulletScreenClient{
 			
 			/*************************************************************/
 		}
+    }
+    
+    /**
+     * 获取服务器返回信息
+     */
+    public List<Map<String, Object>> getServerMessage(){
+    	List<Map<String, Object>> resultList = new ArrayList<>();
+    	//初始化获取弹幕服务器返回信息包大小
+    	byte[] recvByte = new byte[MAX_BUFFER_LENGTH];
+    	//定义服务器返回信息的字符串
+    	String dataStr;
+		try {
+			//读取服务器返回信息，并获取返回信息的整体字节长度
+			int recvLen = bis.read(recvByte, 0, recvByte.length);
+			
+			//根据实际获取的字节数初始化返回信息内容长度
+			byte[] realBuf = new byte[recvLen];
+			//按照实际获取的字节长度读取返回信息
+			System.arraycopy(recvByte, 0, realBuf, 0, recvLen);
+			//根据TCP协议获取返回信息中的字符串信息
+			dataStr = new String(realBuf, 12, realBuf.length - 12);
+			//循环处理socekt黏包情况
+			while(dataStr.lastIndexOf("type@=") > 5){
+				//对黏包中最后一个数据包进行解析
+				MsgView msgView = new MsgView(StringUtils.substring(dataStr, dataStr.lastIndexOf("type@=")));
+				//分析该包的数据类型，以及根据需要进行业务操作
+				//parseServerMsg(msgView.getMessageList());
+				resultList.add(msgView.getMessageList());
+				//处理黏包中的剩余部分
+				dataStr = StringUtils.substring(dataStr, 0, dataStr.lastIndexOf("type@=") - 12);
+			}
+			//对单一数据包进行解析
+			MsgView msgView = new MsgView(StringUtils.substring(dataStr, dataStr.lastIndexOf("type@=")));
+			//分析该包的数据类型，以及根据需要进行业务操作
+			//parseServerMsg(msgView.getMessageList());
+			resultList.add(msgView.getMessageList());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultList;
     }
 }
