@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.barrage.msg.DyMessage;
 import com.barrage.msg.MsgView;
+
+import net.sf.json.JSONObject;
 
 /**
  * @Summary: 弹幕客户端类
@@ -62,15 +65,23 @@ public class DyBulletScreenClient{
      * @param roomId 房间ID
      * @param groupId 弹幕池分组ID
      */
-    public void init(int roomId, int groupId){
+    public String init(int roomId, int groupId){
+    	Map<String, List<String>> resultMap = new HashMap<>();
+    	List<String> list = new ArrayList<>();
     	//连接弹幕服务器
-    	this.connectServer();
+    	String connectServerMessage = this.connectServer();
+    	list.add(connectServerMessage);
     	//登陆指定房间
-    	this.loginRoom(roomId);
+    	String loginRoomMessage = this.loginRoom(roomId);
+    	list.add(loginRoomMessage);
     	//加入指定的弹幕池
-    	this.joinGroup(roomId, groupId);
+    	String joinGroupMessage = this.joinGroup(roomId, groupId);
+    	list.add(joinGroupMessage);
     	//设置客户端就绪标记为就绪状态
     	readyFlag = true;
+    	resultMap.put("info", list);
+    	JSONObject jsonObject = JSONObject.fromObject(resultMap);
+    	return jsonObject.toString();
     }
     
     /**
@@ -84,11 +95,12 @@ public class DyBulletScreenClient{
     /**
      * 连接弹幕服务器
      */
-    private void connectServer(){
+    private String connectServer(){
+    	String message = "";
         try{
         	//获取弹幕服务器访问host
         	String host = InetAddress.getByName(hostName).getHostAddress();
-            //建立socke连接
+            //建立socket连接
         	sock = new Socket(host, port);
             //设置socket输入及输出
             bos = new BufferedOutputStream(sock.getOutputStream());
@@ -96,7 +108,9 @@ public class DyBulletScreenClient{
         }catch(Exception e){
             e.printStackTrace();
         }
-        System.out.println("Server Connect Successfully!");
+        message = "弹幕服务器连接成功!";
+        return message;
+        //System.out.println("Server Connect Successfully!");
         //logger.debug("Server Connect Successfully!");
     }
 
@@ -104,7 +118,8 @@ public class DyBulletScreenClient{
      * 登录指定房间
      * @param roomId
      */
-    private void loginRoom(int roomId){
+    private String loginRoom(int roomId){
+    	String message = "";
     	//获取弹幕服务器登陆请求数据包
     	byte[] loginRequestData = DyMessage.getLoginRequestData(roomId);
     	try{
@@ -120,14 +135,17 @@ public class DyBulletScreenClient{
     		//解析服务器返回的登录信息
     		if(DyMessage.parseLoginRespond(recvByte)){
     			//logger.debug("Receive login response successfully!");
-    			System.out.println("Receive login response successfully!");
+//    			System.out.println("Receive login response successfully!");
+    			message = "登录房间成功！";
             } else {
             	//logger.error("Receive login response failed!");
-            	System.out.println("Receive login response failed!");
+            	//System.out.println("Receive login response failed!");
+            	message = "登录房间失败！";
             }
     	}catch(Exception e){
     		e.printStackTrace();
     	}
+    	return message;
     }
 
     /**
@@ -135,8 +153,8 @@ public class DyBulletScreenClient{
      * @param roomId
      * @param groupId
      */
-    private void joinGroup(int roomId, int groupId)
-    {
+    private String joinGroup(int roomId, int groupId){
+    	String message = "";
     	//获取弹幕服务器加弹幕池请求数据包
     	byte[] joinGroupRequest = DyMessage.getJoinGroupRequest(roomId, groupId);
     	
@@ -145,13 +163,15 @@ public class DyBulletScreenClient{
     		bos.write(joinGroupRequest, 0, joinGroupRequest.length);
             bos.flush();
             //logger.debug("Send join group request successfully!");
-            System.out.println("Send join group request successfully!");
-            
+//            System.out.println("Send join group request successfully!");
+            message = "加入弹幕组成功！";
     	} catch(Exception e){
     		e.printStackTrace();
     		//logger.error("Send join group request failed!");
-    		System.out.println("Send join group request failed!");
+//    		System.out.println("Send join group request failed!");
+    		message = "加入弹幕组失败！";
     	}
+    	return message;
     }
 
     /**

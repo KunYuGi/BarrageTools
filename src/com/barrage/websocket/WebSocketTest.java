@@ -67,7 +67,8 @@ public class WebSocketTest {
     	System.out.println("房间id:" + message);
         int roomId = Integer.parseInt(message);
         int groupId = -9999;
-        client.init(roomId, groupId);
+        String info = client.init(roomId, groupId);
+        sendMessage(info);
         KeepAlive keepAlive = new KeepAlive();
         keepAlive.start();
         keepGetMsg = new KeepGetMsg(this.session);
@@ -105,9 +106,13 @@ public class WebSocketTest {
      * @param message
      * @throws IOException
      */
-    public void sendMessage(String message) throws IOException{
-        this.session.getBasicRemote().sendText(message);
-        //this.session.getAsyncRemote().sendText(message);
+    public void sendMessage(String message){
+        try {
+			this.session.getBasicRemote().sendText(message);
+			//this.session.getAsyncRemote().sendText(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
     public static synchronized int getOnlineCount() {

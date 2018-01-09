@@ -14,6 +14,11 @@
 <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
 
 <script type="text/javascript">
+	var path = '';
+	var speakMessage = '';
+	$(function(){
+		path = $('#path').val();
+	});
 	var websocket = "";
 	var wsUrl = "ws://localhost:8080/barrageTools/websocket";
 	function closeWebSocket(){
@@ -25,6 +30,18 @@
 	
 	function showBarrage(){
 		var roomId = $('#roomId').val();
+		$.ajax({
+			url : path + '/roomMessage',
+			type : 'post',
+			data : {roomId : roomId},
+			dataType : 'json',
+			async : false,
+			success : function(data){
+				$('#roomName').val(data.room_name);
+				$('#ownerName').val(data.owner_name);
+				roomId = data.room_id;
+			}
+		});
 		websocket = new WebSocket(wsUrl);
 		websocket.onopen = function(){
 			console.log("open");
@@ -39,10 +56,21 @@
 			//$('#message').scrollTop($('#message')[0].scrollHeight);
 			//console.log($('#message *').length);
 			var msg = JSON.parse(evt.data);
-			if(msg.type == 'chatmsg'){
-				var nn = '<span style="color:blue;">'+msg.nn+' : </span>';
-				var txt = '<span style="color:black;">'+msg.txt+'</span>';
-				$('#message').append('<p>'+nn+txt+'</p>');
+			if(msg.info){
+				var serverInfo = msg.info;
+				for(var i = 0; i < serverInfo.length; i++){
+					var showInfo = '<p style="color:red;">'+serverInfo[i]+'</p>';
+					$('#message').append(showInfo);
+				}
+			}else{
+				if(msg.type == 'chatmsg'){
+					var nn = '<span style="color:blue;">'+msg.nn+' : </span>';
+					var txt = '<span style="color:black;">'+msg.txt+'</span>';
+					$('#message').append('<p>'+nn+txt+'</p>');
+					if(speakMessage == ''){
+						speakMessage = msg.txt;
+					}
+				}
 			}
 			$('#message').scrollTop($('#message')[0].scrollHeight);
 		}
@@ -52,7 +80,22 @@
 		websocket.onerror = function(evt){
 			console.log("error");
 		}
+		var t = window.setInterval("speakText(speakMessage)",5000);
 	}
+	
+	function test(){
+		speakText("我很帅！");
+	}
+	function speakText(str){
+		if(str){
+		   	var url = "http://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&per=3&text=" + encodeURI(str);        // baidu
+		   	var n = new Audio(url);
+		  	n.src = url;
+		  	n.play();
+		  	speakMessage = '';
+		}
+	}
+	
 </script>
 </head>
 <body>
@@ -63,9 +106,15 @@
 	<input id="connect" type="button" value="连接" onclick="connect()">
 	<input id="close" type="button" value="关闭" onclick="closeWebSocket();">
 	<input id="chick" type="button" value="检测" onclick="look();">
+	<input id="speak" type="button" value="开始" onclick="test();"> 
 	<div>
 		<input id="roomId">
-		<input id="confirm" type="button" value="确定" onclick="showBarrage();">
+		<input id="connect" type="button" value="连接" onclick="showBarrage();">
+		<input id="break" type="button" value="断开" onclick="closeWebSocket();">
+	</div>
+	<div>
+		房间名:<input id="roomName" style="width:200px;">
+		主播名:<input id="ownerName">
 	</div>
 	<div id="message" style="width:500px;height:200px;border:1px solid #00F;overflow:hidden;word-break: break-all;word-wrap: break-word;overflow-y:auto;"></div>
 </body>
