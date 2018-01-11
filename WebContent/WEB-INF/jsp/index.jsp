@@ -8,6 +8,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="referrer" content="never">
 <title>测试WebSocket</title>
 
 <script src= "<%=path %>/js/jquery.min.js"></script>
@@ -16,6 +17,7 @@
 <script type="text/javascript">
 	var path = '';
 	var speakMessage = '';
+	var scroll = true;
 	$(function(){
 		path = $('#path').val();
 	});
@@ -48,7 +50,7 @@
 			websocket.send(roomId);
 		}
 		websocket.onmessage = function(evt){
-			if($('#message *').length >= 20){
+			if($('#message').children().length >= 20){
 				$('#message').children().first().remove();
 			}
 			//console.log(evt.data);
@@ -64,15 +66,20 @@
 				}
 			}else{
 				if(msg.type == 'chatmsg'){
+					var icUrl = 'http://apic.douyucdn.cn/upload/' + decode(msg.ic) + '_middle.jpg';
+					var ic = '<img align="absmiddle" src="'+icUrl+'" style="width:30px;height:30px;border-radius:15px;"/>';
 					var nn = '<span style="color:blue;">'+msg.nn+' : </span>';
 					var txt = '<span style="color:black;">'+msg.txt+'</span>';
-					$('#message').append('<p>'+nn+txt+'</p>');
+					$('#message').append('<p>'+ic+nn+txt+'</p>');
 					if(speakMessage == ''){
 						speakMessage = msg.txt;
 					}
 				}
 			}
-			$('#message').scrollTop($('#message')[0].scrollHeight);
+			console.log(scroll);
+			if(scroll){
+				$('#message').scrollTop($('#message')[0].scrollHeight);
+			}
 		}
 		websocket.onclose = function(evt){
 			console.log("WebSocket closed");
@@ -84,7 +91,11 @@
 	}
 	
 	function test(){
-		speakText("我很帅！");
+		if(scroll){
+			scroll = false;
+		}else{
+			scroll = true;
+		}
 	}
 	function speakText(str){
 		if(str){
@@ -94,6 +105,15 @@
 		  	n.play();
 		  	speakMessage = '';
 		}
+	}
+	
+	/**
+	*把@S转成/
+	*把@A转成@
+	*/
+	function decode(encodeStr){
+		var decodeStr = encodeStr.replace(/@S/g,'/').replace(/@A/g,'@');
+		return decodeStr;
 	}
 	
 </script>
